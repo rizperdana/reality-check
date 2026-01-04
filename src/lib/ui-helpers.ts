@@ -31,8 +31,8 @@ export function friendlySummary(result: JobOfferResult, form: JobOfferForm, lang
     const delta = result.moneyDelta;
     const moneyLine =
     delta >= 0
-    ? `${lang === 'id' ? 'Estimated additional take-home' : 'Estimated additional take-home'}: +Rp ${idrFormat(delta, lang)} / ${lang === 'id' ? 'bulan' : 'month'}.`
-    : `${lang === 'id' ? 'Estimated reduction in take-home' : 'Estimated reduction in take-home'}: -Rp ${idrFormat(Math.abs(delta), lang)} / ${lang === 'id' ? 'bulan' : 'month'}.`;
+    ? `${lang === 'id' ? 'Perkiraan gaji bersih take-home' : 'Estimated additional take-home'}: +Rp ${idrFormat(delta, lang)} / ${lang === 'id' ? 'bulan' : 'month'}.`
+    : `${lang === 'id' ? 'Perkiraan pengurangan take-home' : 'Estimated reduction in take-home'}: -Rp ${idrFormat(Math.abs(delta), lang)} / ${lang === 'id' ? 'bulan' : 'month'}.`;
     lines.push(moneyLine);
 
     lines.push(`${lang === 'id' ? 'Take-home saat ini' : 'Current take-home'}: Rp ${idrFormat(result.raw.estimatedCurrentNet, lang)} · ${lang === 'id' ? 'Setelah pindah' : 'After move'}: Rp ${idrFormat(result.raw.estimatedNewNet, lang)}`);

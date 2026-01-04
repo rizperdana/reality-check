@@ -13,6 +13,7 @@ export default function JobOfferPage(): JSX.Element {
   const [result, setResult] = useState<JobOfferResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showWhy, setShowWhy] = useState<boolean>(false);
+  const [showDonatePopup, setShowDonatePopup] = useState<boolean>(false);
 
   const [form, setForm] = useState<JobOfferForm>({
     currentGrossMonthly: 8000000,
@@ -164,6 +165,29 @@ export default function JobOfferPage(): JSX.Element {
                     {s}
                   </div>
                 ))}
+              </div>
+
+              {/* Donation Call-to-Action */}
+              <div className="mt-8 pt-8 border-t border-neutral-800/50">
+                <div className="bg-gradient-to-br from-amber-500/10 to-transparent p-6 rounded-xl border border-amber-500/20">
+                  <h3 className="text-amber-400 font-bold mb-2 flex items-center gap-2">
+                    <span className="text-lg">☕</span> {String(t('ui.donateTitle'))}
+                  </h3>
+                  <p className="text-neutral-400 text-sm mb-5 leading-relaxed">
+                    {String(t('ui.donateText'))}
+                  </p>
+                  <a
+                    href="https://saweria.co/rizperdana"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center px-6 py-3 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors w-full sm:w-auto"
+                  >
+                    {String(t('ui.donateButton'))}
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </div>
               </div>
             </div>
           </section>

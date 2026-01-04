@@ -46,6 +46,9 @@ export const i18n = {
                 serverError: 'Kesalahan server saat menghitung.',
                 noResult: 'Tidak ada hasil yang diterima dari server.',
             },
+            donateTitle: 'Bantu jaga alat ini tetap gratis',
+            donateText: 'Jika simulasi ini membantumu mengambil keputusan, pertimbangkan untuk memberi dukungan kecil agar server tetap berjalan.',
+            donateButton: 'Traktir Kopi (via Saweria)',
         },
         form: {
             currentGross: 'Gaji sekarang (gross / bulan)',
@@ -116,6 +119,9 @@ export const i18n = {
                 serverError: 'Server error while computing.',
                 noResult: 'No result returned from server.',
             },
+            donateTitle: 'Help keep this tool free',
+            donateText: 'If this simulation helped you make a decision, consider a small donation to keep the servers running.',
+            donateButton: 'Buy a Coffee (via Saweria)',
         },
         form: {
             currentGross: 'Current gross (monthly)',
