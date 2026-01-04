@@ -42,51 +42,64 @@ type JobOfferResult = {
 
 type ApiPayload = { ok: boolean; result?: JobOfferResult; error?: string };
 
+const DATA_VERSION = { id: 'pph21_v1', updatedAt: '2026-01-01' };
+
 const idr = (n: number): string => {
   return new Intl.NumberFormat('id-ID').format(n);
 };
+
+function shortVerdictLabel(verdict: JobOfferResult['verdict']): string {
+  if (verdict === 'POSITIVE') return 'Layak';
+  if (verdict === 'TRADEOFF') return 'Trade-off';
+  return 'Tidak layak';
+}
+
+function suggestionsFor(result: JobOfferResult): string[] {
+  const out: string[] = [];
+  if (result.keyDrivers.includes('money') && result.moneyDelta < 1000000) {
+    out.push('Negosiasikan gaji atau tunjangan transport/remote.');
+  }
+  if (result.keyDrivers.includes('time') || result.timePenalty >= 1) {
+    out.push('Coba minta opsi hybrid / kompensasi waktu / work-from-home.');
+  }
+  if (result.keyDrivers.includes('lifestyle') || result.lifestylePenalty >= 1) {
+    out.push('Minta penjelasan jam kerja, beban on-call, dan cuti.');
+  }
+  if (out.length === 0) {
+    out.push('Pertimbangkan benefit jangka panjang (karier, perkembangan, bonus).');
+  }
+  return out;
+}
 
 function friendlySummary(result: JobOfferResult, form: JobOfferForm): string[] {
   const lines: string[] = [];
   const delta = result.moneyDelta;
   const moneyLine =
-    delta >= 0
-      ? `Perkiraan tambahan take-home: +Rp ${idr(delta)} / bulan.`
-      : `Perkiraan pengurangan take-home: -Rp ${idr(Math.abs(delta))} / bulan.`;
+    delta >= 0 ? `Perkiraan tambahan take-home: +Rp ${idr(delta)} / bulan.` : `Perkiraan pengurangan take-home: -Rp ${idr(Math.abs(delta))} / bulan.`;
   lines.push(moneyLine);
 
-  lines.push(
-    `Take-home saat ini: Rp ${idr(result.raw.estimatedCurrentNet)} / bulan · Setelah pindah: Rp ${idr(
-      result.raw.estimatedNewNet,
-    )} / bulan.`,
-  );
+  lines.push(`Take-home saat ini: Rp ${idr(result.raw.estimatedCurrentNet)} / bulan · Setelah pindah: Rp ${idr(result.raw.estimatedNewNet)} / bulan.`);
 
   if (form.commuteCostDelta !== 0) {
     const sign = form.commuteCostDelta > 0 ? '+' : '-';
-    lines.push(`Perkiraan biaya transport: ${sign}Rp ${idr(Math.abs(form.commuteCostDelta))} / bulan.`);
+    lines.push(`Biaya transport: ${sign}Rp ${idr(Math.abs(form.commuteCostDelta))} / bulan.`);
   }
 
   if (form.commuteMinutesDelta !== 0) {
-    const sign = form.commuteMinutesDelta > 0 ? 'bertambah' : 'berkurang';
-    lines.push(`Waktu perjalanan (new vs now): ${Math.abs(form.commuteMinutesDelta)} menit/hari (${sign}).`);
+    const signWord = form.commuteMinutesDelta > 0 ? 'bertambah' : 'berkurang';
+    lines.push(`Waktu perjalanan: ${Math.abs(form.commuteMinutesDelta)} menit/hari (${signWord}).`);
   }
 
   if (form.onCallWeekend) {
-    lines.push('Positif: ada kerja on-call atau akhir pekan — ini mempengaruhi waktu luang dan energi.');
+    lines.push('Ada kerja on-call / akhir pekan — ini mengurangi waktu luang.');
   }
 
   if (result.keyDrivers.length > 0) {
     lines.push(`Faktor utama: ${result.keyDrivers.join(', ')}.`);
   }
 
-  // action pointers (short & practical)
-  if (result.verdict === 'POSITIVE') {
-    lines.push('Rekomendasi singkat: masuk akal. Periksa benefit lain (BPJS, allowance, cuti).');
-  } else if (result.verdict === 'TRADEOFF') {
-    lines.push('Rekomendasi singkat: ada kompromi. Negosiasikan transport/remote/kompensasi waktu.');
-  } else {
-    lines.push('Rekomendasi singkat: kemungkinan downgrade. Pertimbangkan menolak atau negosiasi ulang.');
-  }
+  const rec = result.verdict === 'POSITIVE' ? 'Masuk akal.' : result.verdict === 'TRADEOFF' ? 'Perlu pertimbangan / negosiasi.' : 'Kemungkinan downgrade.';
+  lines.push(`Ringkasan: ${rec}`);
 
   return lines;
 }
@@ -108,6 +121,7 @@ export default function JobOfferPage(): JSX.Element {
   const [loading, setLoading] = useState<boolean>(false);
   const [result, setResult] = useState<JobOfferResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showWhy, setShowWhy] = useState<boolean>(false);
 
   function update<K extends keyof JobOfferForm>(key: K, value: JobOfferForm[K]) {
     setForm((s) => ({ ...s, [key]: value }));
@@ -129,14 +143,13 @@ export default function JobOfferPage(): JSX.Element {
     setError(null);
     setResult(null);
 
-    const v = validate(form);
-    if (v) {
-      setError(v);
+    const validationMessage = validate(form);
+    if (validationMessage) {
+      setError(validationMessage);
       return;
     }
 
     setLoading(true);
-
     try {
       const payloadPromise: Promise<ApiPayload> = fetch('/api/job-offer', {
         method: 'POST',
@@ -151,10 +164,9 @@ export default function JobOfferPage(): JSX.Element {
         })
         .catch(() => ({ ok: false, error: 'Network error' }));
 
-      const delayMs = 1000 + Math.floor(Math.random() * 2000);
+      const delayMs = 3000 + Math.floor(Math.random() * 2000); // 3..5s
       const delayPromise = new Promise<void>((resolve) => setTimeout(resolve, delayMs));
 
-      // wait for both fetch and delay to complete
       const [payload] = await Promise.all([payloadPromise, delayPromise]);
 
       if (!payload.ok) {
@@ -178,9 +190,20 @@ export default function JobOfferPage(): JSX.Element {
         <header className="mb-6">
           <h1 className="text-3xl font-semibold">RealityCheck — Job Offer Reality</h1>
           <p className="mt-2 text-neutral-400">
-            Masukkan gaji sekarang dan tawaran baru. Alat ini menunjukkan apakah gaji yang lebih tinggi benar-benar
-            meningkatkan uang yang Anda pegang dan kualitas hidup (waktu, commute, dan beban kerja).
+            Masukkan gaji sekarang dan tawaran baru. Alat ini memberi gambaran realistis apakah gaji lebih tinggi benar-benar menambah uang yang
+            Anda pegang dan kualitas hidup (waktu, biaya, stres).
           </p>
+
+          <div className="mt-3 text-sm text-neutral-400">
+            <span>Data: </span>
+            <span className="font-mono text-xs text-neutral-300">{DATA_VERSION.id}</span>
+            <span className="ml-2">· updated {DATA_VERSION.updatedAt}</span>
+          </div>
+
+          <div className="mt-3 rounded-md bg-neutral-900 p-3 border border-neutral-800 text-sm text-neutral-300">
+            <strong>Perhatian singkat:</strong> Ini simulasi berbasis aturan umum. Angka bisa berbeda dari slip gaji final — gunakan untuk membandingkan dan
+            mengambil keputusan, bukan sebagai pengganti konsultan pajak.
+          </div>
         </header>
 
         <form onSubmit={handleSubmit} className="grid gap-4 bg-neutral-900 p-6 rounded-lg shadow-sm">
@@ -375,7 +398,7 @@ export default function JobOfferPage(): JSX.Element {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
                     </svg>
-                    <span> Menghitung… </span>
+                    <span>Menghitung…</span>
                   </>
                 ) : (
                   'Run Reality Check'
@@ -385,10 +408,30 @@ export default function JobOfferPage(): JSX.Element {
           </div>
         </form>
 
+        <div className="mt-4 text-sm text-neutral-400">
+          <button
+            type="button"
+            onClick={() => setShowWhy((s) => !s)}
+            className="text-left underline decoration-dashed underline-offset-2"
+          >
+            Mengapa hasil mungkin berbeda (klik untuk jelaskan)
+          </button>
+
+          {showWhy && (
+            <div className="mt-2 rounded bg-neutral-900 p-3 border border-neutral-800 text-neutral-300">
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Ini menggunakan asumsi konservatif untuk PPh21 & BPJS — bukan perhitungan slip final.</li>
+                <li>Potongan lain (pinjaman, potongan lembur, tunjangan khusus) tidak ikut dihitung kecuali dimasukkan.</li>
+                <li>Jika butuh angka akurat untuk pajak, minta slip/statement atau konsultasi pajak.</li>
+              </ul>
+            </div>
+          )}
+        </div>
+
         {result && (
           <section className="mt-6 p-4 rounded-lg bg-neutral-900 border border-neutral-800">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Hasil: {result.verdict === 'POSITIVE' ? 'Layak' : result.verdict === 'TRADEOFF' ? 'Trade-off' : 'Tidak layak'}</h2>
+              <h2 className="text-lg font-semibold">{shortVerdictLabel(result.verdict)}</h2>
               <div className="text-sm text-neutral-400">Skor akhir: {result.finalScore}</div>
             </div>
 
@@ -414,10 +457,19 @@ export default function JobOfferPage(): JSX.Element {
             </div>
 
             <div className="mt-4">
-              <h3 className="text-sm font-medium text-neutral-200">Penjelasan sederhana</h3>
+              <h3 className="text-sm font-medium text-neutral-200">Penjelasan singkat</h3>
               <ul className="mt-2 list-disc pl-5 text-neutral-300">
                 {friendlySummary(result, form).map((line) => (
                   <li key={line}>{line}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="mt-4">
+              <h3 className="text-sm font-medium text-neutral-200">Apa yang membuat tawaran ini jelas layak?</h3>
+              <ul className="mt-2 list-disc pl-5 text-neutral-300">
+                {suggestionsFor(result).map((sugg) => (
+                  <li key={sugg}>{sugg}</li>
                 ))}
               </ul>
             </div>
