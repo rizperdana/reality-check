@@ -6,22 +6,22 @@ export const DATA_VERSION = { id: 'pph21_v1', updatedAt: '2026-01-01' } as const
 export const i18n = {
     id: {
         ui: {
-            title: 'RealityCheck — Job Offer Reality',
+            title: 'RealityCheck - Job Offer Reality',
             description:
             'Masukkan gaji sekarang dan tawaran baru. Alat ini memberi gambaran realistis apakah gaji lebih tinggi benar-benar menambah uang yang Anda pegang dan kualitas hidup (waktu, biaya, stres).',
             dataLabel: 'Data',
             updated: 'updated',
             attentionTitle: 'Perhatian singkat:',
             attentionText:
-            'Ini simulasi berbasis aturan umum. Angka bisa berbeda dari slip gaji final — gunakan untuk membandingkan dan mengambil keputusan, bukan sebagai pengganti konsultan pajak.',
+            'Simulasi berbasis aturan umum. Angka bisa saja berbeda dari slip gaji final gunakan untuk membandingkan dan mengambil keputusan, bukan sebagai pengganti konsultan pajak.',
             whoFor:
-            'Cocok untuk karyawan bergaji tetap yang membandingkan tawaran kerja baru — terutama bila ada perubahan pajak, commute, jam kerja, atau waktu keluarga.',
+            'Cocok untuk karyawan bergaji tetap yang membandingkan tawaran kerja baru, terutama bila ada perubahan pajak, commute, jam kerja, atau waktu keluarga.',
             startButton: 'Run Reality Check',
             reset: 'Reset',
             loading: 'Menghitung…',
             whyToggle: 'Mengapa hasil mungkin berbeda (klik untuk jelaskan)',
             whyList: [
-                'Menggunakan asumsi konservatif untuk PPh21 & BPJS — bukan perhitungan slip final.',
+                'Menggunakan asumsi konservatif untuk PPh21 & BPJS, bukan perhitungan slip final.',
                 'Potongan lain (pinjaman, tunjangan khusus) tidak ikut dihitung kecuali dimasukkan.',
                 'Untuk angka pajak tepat, minta slip gaji atau konsultasi pajak.',
             ],
@@ -79,22 +79,22 @@ export const i18n = {
     },
     en: {
         ui: {
-            title: 'RealityCheck — Job Offer Reality',
+            title: 'RealityCheck - Job Offer Reality',
             description:
             'Enter your current salary and the new offer. This tool gives a realistic view whether a higher gross salary actually improves your take-home pay and life (time, cost, stress).',
             dataLabel: 'Data',
             updated: 'updated',
             attentionTitle: 'Quick note:',
             attentionText:
-            'This is a simulation using general rules. Numbers may differ from official payslips — use for comparison and decision-making, not as tax advice.',
+            'This is a simulation using general rules. Numbers may differ from official payslips, use for comparison and decision-making, not as tax advice.',
             whoFor:
-            'Suitable for salaried employees comparing a new job offer — especially when taxes, commute, working hours, or family time change.',
+            'Suitable for salaried employees comparing a new job offer, especially when taxes, commute, working hours, or family time change.',
             startButton: 'Run Reality Check',
             reset: 'Reset',
             loading: 'Calculating…',
             whyToggle: 'Why numbers may differ (click to expand)',
             whyList: [
-                'Uses conservative assumptions for PPh21 & BPJS — not an exact payslip calculation.',
+                'Uses conservative assumptions for PPh21 & BPJS, not an exact payslip calculation.',
                 'Other deductions (loans, special allowances) are not included unless entered.',
                 'For exact tax numbers, request payslips or consult a tax professional.',
             ],

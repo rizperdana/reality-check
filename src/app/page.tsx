@@ -56,6 +56,14 @@ export default function JobOfferPage(): JSX.Element {
     return null;
   };
 
+  const formatInput = (val: number) => {
+    return val.toLocaleString('en-US');
+  };
+
+  const parseInput = (val: string) => {
+    return Number(val.replace(/,/g, ''));
+  };
+
   async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault();
     setError(null);
@@ -204,9 +212,13 @@ export default function JobOfferPage(): JSX.Element {
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 text-sm font-mono">Rp</span>
                 <input
-                  type="number"
-                  value={form.currentGrossMonthly}
-                  onChange={(e) => update('currentGrossMonthly', Number(e.target.value))}
+                  type="text"
+                  inputMode="numeric"
+                  value={formatInput(form.currentGrossMonthly)}
+                  onChange={(e) => {
+                    const rawValue = parseInput(e.target.value);
+                    if (!isNaN(rawValue)) update('currentGrossMonthly', rawValue);
+                  }}
                   className="w-full bg-neutral-950 border border-neutral-700 rounded-lg py-2.5 pl-10 pr-4 focus:ring-2 focus:ring-emerald-500 outline-none transition-all font-mono"
                 />
               </div>
@@ -217,9 +229,13 @@ export default function JobOfferPage(): JSX.Element {
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 text-sm font-mono">Rp</span>
                 <input
-                  type="number"
-                  value={form.newGrossMonthly}
-                  onChange={(e) => update('newGrossMonthly', Number(e.target.value))}
+                  type="text"
+                  inputMode="numeric"
+                  value={formatInput(form.newGrossMonthly)}
+                  onChange={(e) => {
+                    const rawValue = parseInput(e.target.value);
+                    if (!isNaN(rawValue)) update('newGrossMonthly', rawValue);
+                  }}
                   className="w-full bg-neutral-950 border border-emerald-500/50 rounded-lg py-2.5 pl-10 pr-4 focus:ring-2 focus:ring-emerald-500 outline-none transition-all font-mono"
                 />
               </div>
@@ -253,9 +269,13 @@ export default function JobOfferPage(): JSX.Element {
               <div className="space-y-2">
                 <label className="text-sm text-neutral-400">{String(t('form.commuteCost'))}</label>
                 <input
-                  type="number"
-                  value={form.commuteCostDelta}
-                  onChange={(e) => update('commuteCostDelta', Number(e.target.value))}
+                  type="text"
+                  inputMode="numeric"
+                  value={formatInput(form.commuteCostDelta)}
+                  onChange={(e) => {
+                    const rawValue = parseInput(e.target.value);
+                    if (!isNaN(rawValue)) update('commuteCostDelta', rawValue);
+                  }}
                   className="w-full bg-neutral-950 border border-neutral-700 rounded-lg py-2.5 px-4 focus:ring-2 focus:ring-emerald-500 outline-none font-mono"
                 />
               </div>
