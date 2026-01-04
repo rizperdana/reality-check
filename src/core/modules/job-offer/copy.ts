@@ -17,18 +17,27 @@ export function generateExplanation(p: CopyParams): string {
     const reasons: string[] = [];
 
     if (p.drivers.includes('money')) {
-        reasons.push(`Tax difference and BPJS adjustments affect take-home pay (PPh est: current ${formatIDR(p.estCurrentPph)}, new ${formatIDR(p.estNewPph)}).`);
+        reasons.push(
+            `Perbedaan pajak dan penyesuaian BPJS memengaruhi gaji bersih yang diterima (estimasi PPh: saat ini ${formatIDR(p.estCurrentPph)}, baru ${formatIDR(p.estNewPph)}).`
+        );
     }
+
     if (p.drivers.includes('time')) {
-        reasons.push(`Extra commute or on-call obligations reduce your usable time (time penalty: ${p.tPenalty}).`);
+        reasons.push(
+            `Tambahan waktu perjalanan atau kewajiban on-call mengurangi waktu efektif yang bisa Anda gunakan (penalti waktu: ${p.tPenalty}).`
+        );
     }
+
     if (p.drivers.includes('lifestyle')) {
-        reasons.push(`Lifestyle risks flagged (stress, family-time, role clarity).`);
+        reasons.push(
+            `Terdapat risiko gaya hidup yang terdeteksi (tingkat stres, waktu untuk keluarga, kejelasan peran).`
+        );
     }
+
     const base = {
-        POSITIVE: `✅ This offer appears to be a net positive: ${moneyText}. ${reasons.join(' ')}`,
-        TRADEOFF: `⚠️ This is a trade-off: ${moneyText}. ${reasons.join(' ')} Consider whether the added income is worth the time/lifestyle cost.`,
-        NEGATIVE: `❌ Likely a downgrade: ${moneyText}. ${reasons.join(' ')} You may want to decline or negotiate changes.`,
+        POSITIVE: `✅ Penawaran ini terlihat sebagai keuntungan bersih: ${moneyText}. ${reasons.join(' ')}`,
+        TRADEOFF: `⚠️ Ini merupakan sebuah trade-off: ${moneyText}. ${reasons.join(' ')} Pertimbangkan apakah tambahan penghasilan tersebut sebanding dengan biaya waktu dan gaya hidup.`,
+        NEGATIVE: `❌ Kemungkinan merupakan penurunan: ${moneyText}. ${reasons.join(' ')} Anda mungkin perlu menolak atau menegosiasikan perubahan.`,
     }
 
     return base[p.verdict];
