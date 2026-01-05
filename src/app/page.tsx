@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { JobOfferForm, JobOfferResult } from '@/core/modules/job-offer/types';
+import type { JobOfferForm, JobOfferResult, WorkMode, EmploymentType, MaritalStatus } from '@/core/modules/job-offer/types';
 import { detectLangFromNavigator, translate, DEFAULT_LANG, DATA_VERSION, type Lang } from '@/lib/i18n';
 import { friendlySummary, suggestionsFor, shortVerdictLabel } from '@/lib/ui-helpers';
 
 type ApiPayload = { ok: boolean; result?: JobOfferResult; error?: string };
 
-export default function JobOfferPage(): JSX.Element {
+export default function JobOfferPage() {
   const [lang, setLang] = useState<Lang>(DEFAULT_LANG);
   const [loading, setLoading] = useState<boolean>(false);
   const [result, setResult] = useState<JobOfferResult | null>(null);
@@ -16,15 +16,23 @@ export default function JobOfferPage(): JSX.Element {
 
   const [form, setForm] = useState<JobOfferForm>({
     currentGrossMonthly: 8000000,
-    newGrossMonthly: 10000000,
+    newGrossMonthly: 12000000,
+
+    // New Fields
+    maritalStatus: 'single',
+    dependents: 0,
+    currentEmploymentType: 'fulltime',
+    newEmploymentType: 'contract',
+    currentWorkMode: 'onsite',
+    newWorkMode: 'hybrid',
+
     commuteMinutesDelta: 0,
     commuteCostDelta: 0,
     onCallWeekend: false,
     freeTimeValue: 'medium',
-    maritalStatus: 'single',
-    dependents: 0,
-    bpjsParticipation: true,
-    lifestyleFlags: { likelyMoreStress: false, lessFamilyTime: false, unclearExpectations: false },
+    bpjsCurrent: true,
+    bpjsNew: true,
+    lifestyleFlags: { likelyMoreStress: false, lessFamilyTime: false, unclearExpectations: false, careerStagnation: false },
   });
 
   useEffect(() => {
@@ -49,6 +57,7 @@ export default function JobOfferPage(): JSX.Element {
   const retroCard = "border-[3px] border-white shadow-[6px_6px_0px_0px_rgba(255,255,255,1)] bg-neutral-900 p-6 mb-8 transition-all";
   const retroButton = "border-[3px] border-white shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] font-bold uppercase tracking-wider transition-all";
   const retroInput = "bg-neutral-950 border-[3px] border-white p-3 font-mono text-white focus:bg-white focus:text-black outline-none transition-all w-full";
+  const retroSelect = `${retroInput} appearance-none cursor-pointer`;
 
   async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault();
@@ -75,12 +84,13 @@ export default function JobOfferPage(): JSX.Element {
 
       setResult(payload.result);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError((err as Error).message);
     } finally {
       setLoading(false);
     }
   }
+
 
   return (
     <main className="min-h-screen bg-neutral-950 text-white font-mono p-4 md:p-8">
@@ -111,7 +121,9 @@ export default function JobOfferPage(): JSX.Element {
         {result && !loading && (
           <section className={`${retroCard} border-white !bg-neutral-900 animate-in zoom-in-95 duration-300`}>
              <div className="flex justify-between border-b-2 border-white/20 pb-4 mb-6">
-                <span className="bg-white text-black px-3 py-1 font-black">VERDICT: {shortVerdictLabel(result.verdict, lang)}</span>
+                <span className={`${result.verdict === 'POSITIVE' ? '!bg-emerald-500 !text-black' :
+               result.verdict === 'TRADEOFF' ? '!bg-yellow-400 !text-black' :
+               '!bg-red-600 !text-white'} text-black px-3 py-1 font-black`}>VERDICT: {shortVerdictLabel(result.verdict, lang)}</span>
                 <span className="font-black text-2xl">SCORE: {result.finalScore}</span>
              </div>
 
@@ -146,127 +158,139 @@ export default function JobOfferPage(): JSX.Element {
           </section>
         )}
 
-        {/* Input Form */}
-        <form onSubmit={handleSubmit} className={retroCard}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            {/* Financials Column */}
-            <div className="space-y-6">
-              <h2 className="bg-white text-black inline-block px-2 font-black uppercase mb-2 italic">01. Financials</h2>
+        {/* THE FORM */}
+         <form onSubmit={handleSubmit} className={retroCard}>
 
-              <div className="space-y-2">
-                <label className="text-xs font-black uppercase text-neutral-400 tracking-wider">{String(t('form.currentGross'))}</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 font-black text-neutral-500">RP</span>
-                  <input
-                    type="text" inputMode="numeric"
-                    value={formatInput(form.currentGrossMonthly)}
-                    onChange={(e) => update('currentGrossMonthly', parseInput(e.target.value))}
-                    className={`${retroInput} pl-10`}
-                  />
+            {/* SECTION 1: PERSONAL & TAX */}
+            <div className="mb-8 border-b-2 border-white/20 pb-6">
+                <h2 className="bg-white text-black inline-block px-2 font-black uppercase mb-4 italic">01. Profile (Tax & Status)</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-neutral-400">Marital Status</label>
+                        <select
+                            value={form.maritalStatus}
+                            onChange={(e) => update('maritalStatus', e.target.value as MaritalStatus)}
+                            className={retroSelect}
+                        >
+                            <option value="single">Single (TK)</option>
+                            <option value="married">Married (K)</option>
+                        </select>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-neutral-400">Dependents (Child)</label>
+                        <select
+                            value={form.dependents}
+                            onChange={(e) => update('dependents', Number(e.target.value))}
+                            className={retroSelect}
+                        >
+                            <option value={0}>0</option>
+                            <option value={1}>1</option>
+                            <option value={2}>2</option>
+                            <option value={3}>3+</option>
+                        </select>
+                    </div>
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-black uppercase text-emerald-400 tracking-wider">{String(t('form.newGross'))}</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 font-black text-emerald-500">RP</span>
-                  <input
-                    type="text" inputMode="numeric"
-                    value={formatInput(form.newGrossMonthly)}
-                    onChange={(e) => update('newGrossMonthly', parseInput(e.target.value))}
-                    className={`${retroInput} !border-emerald-500 pl-10`}
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 py-2">
-                <input
-                  type="checkbox"
-                  checked={form.bpjsParticipation}
-                  onChange={(e) => update('bpjsParticipation', e.target.checked)}
-                  className="appearance-none w-5 h-5 border-2 border-white checked:bg-emerald-500 transition-all cursor-pointer"
-                />
-                <label className="text-xs font-black uppercase">{String(t('form.bpjs'))}</label>
-              </div>
             </div>
 
-            {/* Lifestyle Column */}
-            <div className="space-y-6">
-              <h2 className="bg-white text-black inline-block px-2 font-black uppercase mb-2 italic">02. Time & Life</h2>
+            {/* SECTION 2: JOB COMPARISON */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                {/* CURRENT JOB */}
+                <div className="space-y-4">
+                     <h3 className="text-neutral-500 font-black uppercase tracking-widest border-b border-white/20 pb-2">Current Job</h3>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                   <label className="text-[10px] font-black uppercase text-neutral-400">{String(t('form.commuteMinutes'))}</label>
-                   <input
-                      type="number"
-                      value={form.commuteMinutesDelta}
-                      onChange={(e) => update('commuteMinutesDelta', Number(e.target.value))}
-                      className={retroInput}
-                    />
+                     <div className="space-y-1">
+                        <label className="text-[10px] uppercase font-bold text-neutral-400">Gross Salary</label>
+                        <input type="text" inputMode="numeric" value={formatInput(form.currentGrossMonthly)} onChange={(e) => update('currentGrossMonthly', parseInput(e.target.value))} className={retroInput} />
+                     </div>
+
+                     <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                             <label className="text-[10px] uppercase font-bold text-neutral-400">Status</label>
+                             <select value={form.currentEmploymentType} onChange={(e) => update('currentEmploymentType', e.target.value as EmploymentType)} className={retroSelect}>
+                                 <option value="fulltime">Full-Time</option>
+                                 <option value="contract">Contract</option>
+                             </select>
+                        </div>
+                        <div className="space-y-1">
+                             <label className="text-[10px] uppercase font-bold text-neutral-400">Work Mode</label>
+                             <select value={form.currentWorkMode} onChange={(e) => update('currentWorkMode', e.target.value as WorkMode)} className={retroSelect}>
+                                 <option value="onsite">On-Site</option>
+                                 <option value="hybrid">Hybrid</option>
+                                 <option value="remote">Remote</option>
+                             </select>
+                        </div>
+                     </div>
+                     <div className="pt-2">
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                             <input type="checkbox" checked={form.bpjsCurrent} onChange={(e) => update('bpjsCurrent', e.target.checked)} className="appearance-none w-4 h-4 border-2 border-white checked:bg-emerald-500" />
+                             <span className="text-[10px] font-black uppercase text-neutral-400">Include BPJS</span>
+                        </label>
+                     </div>
                 </div>
-                <div className="space-y-2">
-                   <label className="text-[10px] font-black uppercase text-neutral-400">{String(t('form.commuteCost'))}</label>
-                   <input
-                      type="text"
-                      inputMode="numeric"
-                      value={formatInput(form.commuteCostDelta)}
-                      onChange={(e) => update('commuteCostDelta', parseInput(e.target.value))}
-                      className={retroInput}
-                    />
+
+                {/* NEW OFFER */}
+                <div className="space-y-4">
+                     <h3 className="text-emerald-500 font-black uppercase tracking-widest border-b border-emerald-500/20 pb-2">New Offer</h3>
+
+                     <div className="space-y-1">
+                        <label className="text-[10px] uppercase font-bold text-emerald-400">Gross Salary</label>
+                        <input type="text" inputMode="numeric" value={formatInput(form.newGrossMonthly)} onChange={(e) => update('newGrossMonthly', parseInput(e.target.value))} className={`${retroInput} !border-emerald-500`} />
+                     </div>
+
+                     <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                             <label className="text-[10px] uppercase font-bold text-emerald-400">Status</label>
+                             <select value={form.newEmploymentType} onChange={(e) => update('newEmploymentType', e.target.value as EmploymentType)} className={retroSelect}>
+                                 <option value="fulltime">Full-Time</option>
+                                 <option value="contract">Contract</option>
+                             </select>
+                        </div>
+                        <div className="space-y-1">
+                             <label className="text-[10px] uppercase font-bold text-emerald-400">Work Mode</label>
+                             <select value={form.newWorkMode} onChange={(e) => update('newWorkMode', e.target.value as WorkMode)} className={retroSelect}>
+                                 <option value="onsite">On-Site</option>
+                                 <option value="hybrid">Hybrid</option>
+                                 <option value="remote">Remote</option>
+                             </select>
+                        </div>
+                     </div>
+                     <div className="pt-2">
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                             <input type="checkbox" checked={form.bpjsNew} onChange={(e) => update('bpjsNew', e.target.checked)} className="appearance-none w-4 h-4 border-2 border-white checked:bg-emerald-500" />
+                             <span className="text-[10px] font-black uppercase text-neutral-400">Include BPJS</span>
+                        </label>
+                     </div>
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-black uppercase text-neutral-400 tracking-wider">{String(t('form.freeTimeValue'))}</label>
-                <select
-                  value={form.freeTimeValue}
-                  onChange={(e) => update('freeTimeValue', e.target.value as any)}
-                  className={`${retroInput} appearance-none cursor-pointer`}
-                >
-                  <option value="low" className="text-black">{String(t('form.low'))}</option>
-                  <option value="medium" className="text-black">{String(t('form.medium'))}</option>
-                  <option value="high" className="text-black">{String(t('form.high'))}</option>
-                </select>
-              </div>
-
-              <div className="flex flex-col gap-2 pt-2">
-                {(Object.keys(form.lifestyleFlags) as Array<keyof typeof form.lifestyleFlags>).map((flag) => (
-                  <label key={flag} className="flex items-center gap-3 cursor-pointer group p-1 transition-all">
-                    <input
-                      type="checkbox"
-                      checked={form.lifestyleFlags[flag]}
-                      onChange={(e) => updateLifestyle(flag, e.target.checked)}
-                      className="appearance-none w-5 h-5 border-2 border-white checked:bg-emerald-500 transition-all cursor-pointer"
-                    />
-                    <span className="text-[11px] font-black uppercase text-neutral-300 group-hover:text-white">
-                      {String(t(`form.${flag}`))}
-                    </span>
-                  </label>
-                ))}
-              </div>
             </div>
-          </div>
 
-          <div className="pt-6">
-            {error && <div className="mb-6 p-4 border-2 border-red-500 bg-red-500/10 text-red-500 font-black uppercase text-xs">{error}</div>}
+            {/* SECTION 3: LOGISTICS (Delta) */}
+            <div className="mb-8 pt-6 border-t-2 border-white/20">
+                <h2 className="bg-white text-black inline-block px-2 font-black uppercase mb-4 italic">03. Impact & Logistics</h2>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                     <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-neutral-400">Commute Δ (Min)</label>
+                        <input type="number" placeholder="e.g. 30 (more) or -20 (less)" value={form.commuteMinutesDelta} onChange={(e) => update('commuteMinutesDelta', Number(e.target.value))} className={retroInput} />
+                     </div>
+                     <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-neutral-400">Cost Δ (IDR)</label>
+                        <input type="text" inputMode="numeric" placeholder="e.g. 500000" value={formatInput(form.commuteCostDelta)} onChange={(e) => update('commuteCostDelta', parseInput(e.target.value))} className={retroInput} />
+                     </div>
+                </div>
+                 {/* Lifestyle Checkboxes */}
+                 <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                     {(['likelyMoreStress', 'lessFamilyTime', 'unclearExpectations', 'careerStagnation'] as const).map((flag) => (
+                        <label key={flag} className="flex items-center gap-2 cursor-pointer">
+                           <input type="checkbox" checked={form.lifestyleFlags[flag]} onChange={(e) => updateLifestyle(flag, e.target.checked)} className="appearance-none w-4 h-4 border-2 border-white checked:bg-emerald-500" />
+                           <span className="text-[10px] font-black uppercase">{String(t(`form.${flag}`))}</span>
+                        </label>
+                     ))}
+                 </div>
+            </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className={`${retroButton} w-full py-5 text-xl bg-emerald-500 text-black hover:bg-white disabled:bg-neutral-800 disabled:text-neutral-500 disabled:shadow-none`}
-            >
-              {loading ? "THINKING..." : String(t('ui.startButton'))}
+            <button type="submit" disabled={loading} className={`${retroButton} w-full py-5 text-xl bg-emerald-500 text-black hover:bg-white`}>
+                {loading ? "CALCULATING..." : "ANALYZE OFFER"}
             </button>
-
-            <button
-              type="button"
-              onClick={() => window.location.reload()}
-              className="w-full mt-6 text-xs font-black uppercase text-neutral-600 hover:text-white underline decoration-2 underline-offset-4"
-            >
-              {String(t('ui.reset'))}
-            </button>
-          </div>
-        </form>
+         </form>
 
         {/* Footnotes */}
         <footer className="mt-12 space-y-8 opacity-60">
@@ -280,7 +304,7 @@ export default function JobOfferPage(): JSX.Element {
             {showWhy && (
               <ul className="space-y-2 font-bold italic">
                 {(t('ui.whyList') as string[]).map((item, i) => (
-                  <li key={i}>// {item}</li>
+                  <li key={i}>{'//'} {item}</li>
                 ))}
               </ul>
             )}
