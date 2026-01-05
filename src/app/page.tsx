@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import type { JobOfferForm, JobOfferResult, WorkMode, EmploymentType, MaritalStatus } from '@/core/modules/job-offer/types';
 import { detectLangFromNavigator, translate, DEFAULT_LANG, DATA_VERSION, type Lang } from '@/lib/i18n';
 import { friendlySummary, suggestionsFor, shortVerdictLabel } from '@/lib/ui-helpers';
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 type ApiPayload = { ok: boolean; result?: JobOfferResult; error?: string };
 
@@ -328,6 +329,7 @@ export default function JobOfferPage() {
           </div>
         </footer>
       </div>
+      <SpeedInsights/>
     </main>
   );
 }
