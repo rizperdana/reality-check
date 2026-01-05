@@ -36,6 +36,7 @@ export interface JobOfferInput {
         careerStagnation?: boolean;
     };
 }
+export type VerdictType = 'POSITIVE' | 'TRADEOFF' | 'NEGATIVE';
 
 export interface JobOfferResult {
     moneyDelta: number;
@@ -45,7 +46,7 @@ export interface JobOfferResult {
     statusPenalty: number; // New: Penalty for moving to contract
     flexibilityScore: number; // New: Bonus for remote
     finalScore: number;
-    verdict: 'POSITIVE' | 'TRADEOFF' | 'NEGATIVE';
+    verdict: VerdictType;
     keyDrivers: string[]; // e.g., ['tax','time']
     explanation: string;
     raw: {
