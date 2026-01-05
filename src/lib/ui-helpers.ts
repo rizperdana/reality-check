@@ -42,9 +42,10 @@ export function friendlySummary(result: JobOfferResult, form: JobOfferForm, lang
         lines.push(`${lang === 'id' ? 'Biaya transport' : 'Transport cost'}: ${sign}Rp ${idrFormat(Math.abs(form.commuteCostDelta), lang)} / ${lang === 'id' ? 'bulan' : 'month'}.`);
     }
 
-    if (form.commuteMinutesDelta !== 0) {
-        const signWord = form.commuteMinutesDelta > 0 ? (lang === 'id' ? 'bertambah' : 'increase') : (lang === 'id' ? 'berkurang' : 'decrease');
-        lines.push(`${lang === 'id' ? 'Waktu perjalanan' : 'Commute time'}: ${Math.abs(form.commuteMinutesDelta)} ${lang === 'id' ? 'menit/hari' : 'min/day'} (${signWord}).`);
+    if (form.commuteMinutesDelta && form.commuteMinutesDelta !== 0) {
+        const delta = form.commuteMinutesDelta;
+        const signWord = delta > 0 ? (lang === 'id' ? 'bertambah' : 'increase') : (lang === 'id' ? 'berkurang' : 'decrease');
+        lines.push(`${lang === 'id' ? 'Waktu perjalanan' : 'Commute time'}: ${Math.abs(delta)} ${lang === 'id' ? 'menit/hari' : 'min/day'} (${signWord}).`);
     }
 
     if (form.onCallWeekend) {
