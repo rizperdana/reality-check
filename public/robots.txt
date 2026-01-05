@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://realitycheck.vercel.app/sitemap.xml
+Sitemap: https://pindahkerja.vercel.app/sitemap.xml

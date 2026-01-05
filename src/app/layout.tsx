@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RealityCheck - Cek Tawaran Kerja (Salary Decision Simulator)",
+  title: "PindahKerja - Cek Tawaran Kerja (Salary Decision Simulator)",
   description: "Bantu karyawan di Indonesia ambil keputusan pindah kerja berdasarkan gaji, transport, BPJS, dan lifestyle.",
-  keywords: ["gaji", "pindah kerja", "job offer", "indonesia", "salary calculator", "pph21"],
+  keywords: ["gaji", "pindah kerja", "salary check", "job offer", "indonesia", "salary calculator", "pph21"],
 };
 
 export default function RootLayout({

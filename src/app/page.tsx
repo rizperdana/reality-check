@@ -323,7 +323,7 @@ export default function JobOfferPage() {
                 <span>DATA: {DATA_VERSION.id}</span>
                 <span>VER: {DATA_VERSION.updatedAt}</span>
               </div>
-              <div className="bg-white text-black px-2 py-0.5">realitycheck.vercel.app // 2026</div>
+              <div className="bg-white text-black px-2 py-0.5">pindahkerja.vercel.app // 2026</div>
             </div>
           </div>
         </footer>

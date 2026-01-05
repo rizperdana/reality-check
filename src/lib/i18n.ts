@@ -6,9 +6,9 @@ export const DATA_VERSION = { id: 'pph21_v1', updatedAt: '2026-01-01' } as const
 export const i18n = {
     id: {
         ui: {
-            title: 'RealityCheck - Cek Tawaran Kerja',
+            title: 'PindahKerja - Cek Tawaran Kerja',
             description:
-            'Masukin gaji sekarang dan tawaran baru. Kita bantu lo cek: apa gaji lebih gede beneran bikin dompet tebal, atau cuma angka doang.',
+            'Bandingin gaji sekarang vs tawaran baru. Kita bantu lo cek: apa pindah kerja beneran bikin dompet tebal, atau cuma angka doang.',
             dataLabel: 'Data',
             updated: 'update',
             attentionTitle: 'BTW:',
@@ -80,9 +80,9 @@ export const i18n = {
     },
     en: {
         ui: {
-            title: 'RealityCheck - Job Offer Reality',
+            title: 'PindahKerja - Job Offer Reality',
             description:
-            `Enter current salary and new offer. We'll check if that bigger number actually means more money in your pocket, or just looks good on paper.`,
+            `Compare current salary vs new offer. We'll check if moving jobs actually means more money in your pocket, or just looks good on paper.`,
             dataLabel: 'Data',
             updated: 'updated',
             attentionTitle: 'Heads up:',
