@@ -105,7 +105,8 @@ export default function JobOfferPage() {
           </div>
           <div className="flex gap-2 bg-black p-1 border-2 border-white">
             {(['id', 'en'] as const).map((l) => (
-              <button key={l} onClick={() => setLang(l)} className={`px-4 py-1 text-xs font-black transition-colors ${lang === l ? 'bg-white text-black' : 'text-white hover:bg-white/10'}`}>
+              <button key={l} onClick={() => setLang(l)} className={`px-4 py-1 text-xs font-black transition-colors flex items-center gap-2 ${lang === l ? 'bg-white text-black' : 'text-white hover:bg-white/10'}`}>
+                <span>{l === 'id' ? '🇮🇩' : '🇬🇧'}</span>
                 {l.toUpperCase()}
               </button>
             ))}
