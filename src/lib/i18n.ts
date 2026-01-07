@@ -120,9 +120,9 @@ export const i18n = {
                 serverError: 'Server error. Try again.',
                 noResult: 'No result from server.',
             },
-            donateTitle: 'Buy dev coffee ☕',
-            donateText: 'Help keep the dev caffeinated while building this.',
-            donateButton: 'Send Tips',
+            donateTitle: 'Get indomie for dev 🍜',
+            donateText: 'Send some a plate of indomie foor dev.',
+            donateButton: 'Send Indomie (Saweria)',
         },
         form: {
             currentGross: 'Current gross (monthly)',
