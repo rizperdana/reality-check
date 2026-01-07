@@ -16,8 +16,8 @@ export default function JobOfferPage() {
   const [showWhy, setShowWhy] = useState<boolean>(false);
 
   const [form, setForm] = useState<JobOfferForm>({
-    currentGrossMonthly: 8000000,
-    newGrossMonthly: 12000000,
+    currentGrossMonthly: 3000000,
+    newGrossMonthly: 4500000,
 
     // New Fields
     maritalStatus: 'single',
