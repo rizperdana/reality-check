@@ -47,7 +47,7 @@ export const i18n = {
                 noResult: 'Gak ada hasil dari server.',
             },
             donateTitle: 'Beli Indomie buat dev 🍜',
-            donateText: 'Terima bang sudah bikin tools ini bang',
+            donateText: 'Terimakasih sudah bikin tools ini bang',
             donateButton: 'Sama sama bang (Saweria)',
         },
         form: {
