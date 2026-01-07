@@ -60,19 +60,25 @@ export default function JobOfferPage() {
   const retroInput = "bg-neutral-950 border-[3px] border-white p-3 font-mono text-white focus:bg-white focus:text-black outline-none transition-all w-full";
   const retroSelect = `${retroInput} appearance-none cursor-pointer`;
 
+  const [honey, setHoney] = useState<string>('');
+
   async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault();
+    if (honey) return; // Silent abort for bots
+
     setError(null);
     setResult(null);
 
     setLoading(true);
     try {
-      // 2-3 second random delay to show "thinking" and prevent spam
       const delayMs = 2000 + Math.floor(Math.random() * 1000);
 
       const payloadPromise = fetch('/api/job-offer', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-rc-client': 'pindahkerja-web'
+        },
         body: JSON.stringify(form),
       }).then(r => r.json());
 
@@ -162,6 +168,8 @@ export default function JobOfferPage() {
 
         {/* THE FORM */}
          <form onSubmit={handleSubmit} className={retroCard}>
+            {/* Honeypot for bots */}
+            <input type="text" value={honey} onChange={(e) => setHoney(e.target.value)} style={{ display: 'none' }} tabIndex={-1} autoComplete="off" />
 
             {/* SECTION 1: PERSONAL & TAX */}
             <div className="mb-8 border-b-2 border-white/20 pb-6">

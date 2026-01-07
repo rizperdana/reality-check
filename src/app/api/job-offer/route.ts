@@ -5,16 +5,39 @@ import { supabase } from '@/lib/supabase';
 
 export async function POST(req: Request) {
     try {
+        // 1. Client Source Validation
+        const clientHeader = req.headers.get('x-rc-client');
+        if (clientHeader !== 'pindahkerja-web') {
+            return NextResponse.json({ ok: false, error: 'Unauthorized source' }, { status: 403 });
+        }
+
         const body = await req.json();
         const input = body as JobOfferInput;
         const result = computeJobOfferDecision(input);
 
-        // Store to Supabase asynchronously (best effort)
-        if (supabase) {
-            const forwarded = req.headers.get("x-forwarded-for");
-            const ip = forwarded ? forwarded.split(/, /)[0] : "unknown";
-            const userAgent = req.headers.get("user-agent") || "unknown";
+        // 2. Metadata Extraction
+        const forwarded = req.headers.get("x-forwarded-for");
+        const ip = forwarded ? forwarded.split(/, /)[0] : "unknown";
+        const userAgent = req.headers.get("user-agent") || "unknown";
 
+        // 3. Rate Limiting (using Supabase if available)
+        if (supabase && ip !== 'unknown') {
+            const { count, error: countErr } = await supabase
+                .from('job_offers')
+                .select('*', { count: 'exact', head: true })
+                .eq('ip_hash', ip)
+                .gte('created_at', new Date(Date.now() - 5 * 60 * 1000).toISOString());
+
+            if (!countErr && count !== null && count >= 5) {
+                return NextResponse.json({
+                    ok: false,
+                    error: 'Terlalu banyak request. Coba lagi 5 menit lagi ya.'
+                }, { status: 429 });
+            }
+        }
+
+        // 4. Persistence (Best Effort)
+        if (supabase) {
             try {
                 await supabase.from('job_offers').insert({
                     input: body,
@@ -31,8 +54,11 @@ export async function POST(req: Request) {
             }
         }
 
-        return NextResponse.json({ok: true, result});
+        return NextResponse.json({ ok: true, result });
     } catch (err) {
-        return NextResponse.json({ ok: false, error: (err as Error).message }, {status: 500});
+        return NextResponse.json({
+            ok: false,
+            error: (err as Error).message
+        }, { status: 500 });
     }
 }
