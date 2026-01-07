@@ -315,7 +315,6 @@ export default function JobOfferPage() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] font-black uppercase border-t-2 border-white/10 pt-8">
             <div className="flex flex-wrap justify-center gap-4">
               <a href="https://github.com/rizperdana" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-500 transition-colors underline decoration-2 underline-offset-4">GH: rizperdana</a>
-              <a href="https://x.com/0Sudo" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-500 transition-colors underline decoration-2 underline-offset-4">X: @0Sudo</a>
               <a href="mailto:rizperdana16@proton.me" className="hover:text-emerald-500 transition-colors underline decoration-2 underline-offset-4">EMAIL: rizperdana16@proton.me</a>
             </div>
 
