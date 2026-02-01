@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import type { JobOfferForm, JobOfferResult, WorkMode, EmploymentType, MaritalStatus } from '@/core/modules/job-offer/types';
 import { detectLangFromNavigator, translate, DEFAULT_LANG, DATA_VERSION, type Lang } from '@/lib/i18n';
 import { friendlySummary, suggestionsFor, shortVerdictLabel } from '@/lib/ui-helpers';
+import { parseMarkdown } from '@/lib/markdown';
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
 type ApiPayload = { ok: boolean; result?: JobOfferResult; error?: string };
@@ -79,7 +80,7 @@ export default function JobOfferPage() {
           'Content-Type': 'application/json',
           'x-rc-client': 'pindahkerja-web'
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, lang }),
       }).then(r => r.json());
 
       const delayPromise = new Promise((resolve) => setTimeout(resolve, delayMs));
@@ -144,15 +145,31 @@ export default function JobOfferPage() {
                 ))}
              </div>
 
-             <div className="grid gap-3 mb-8">
-                {suggestionsFor(result, lang).map((s, i) => (
-                  <div key={i} className="bg-white/5 p-4 border-2 border-white/20 text-sm font-bold">
-                    {s}
-                  </div>
-                ))}
-              </div>
+              <div className="grid gap-3 mb-8">
+                 {suggestionsFor(result, lang).map((s, i) => (
+                   <div key={i} className="bg-white/5 p-4 border-2 border-white/20 text-sm font-bold">
+                     {s}
+                   </div>
+                 ))}
+               </div>
 
-             {/* Small, Funny Donation Section */}
+              {result.aiRecommendation && (
+                <div className="mb-8">
+                  <h3 className="bg-purple-500 text-black inline-block px-2 font-black uppercase mb-3 italic text-sm">
+                    {String(t('ui.aiRecommendationTitle'))}
+                  </h3>
+                  <div className="bg-purple-500/10 border-2 border-purple-500/30 p-4">
+                    <div
+                      className="text-sm font-bold leading-relaxed"
+                      dangerouslySetInnerHTML={{
+                        __html: parseMarkdown(result.aiRecommendation)
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Small, Funny Donation Section */}
              <div className="border-t-2 border-white/20 pt-6">
                 <div className="bg-emerald-500/10 text-white p-4 border-2 border-white flex flex-col sm:flex-row items-center justify-between gap-4">
                   <p className="text-[11px] font-bold italic leading-tight">

@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { computeJobOfferDecision } from '../../../core/modules/job-offer/verdict';
 import type { JobOfferInput } from '../../../core/modules/job-offer/types';
+import type { Lang } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
+import { getAIRecommendation } from '@/lib/ai-service';
 
 export async function POST(req: Request) {
     try {
@@ -14,6 +16,14 @@ export async function POST(req: Request) {
         const body = await req.json();
         const input = body as JobOfferInput;
         const result = computeJobOfferDecision(input);
+
+        // 1.5. AI Recommendation - Use language from request body
+        const lang = (body.lang as Lang) || 'id';
+
+        const aiRecommendation = await getAIRecommendation(result, input, lang);
+        if (aiRecommendation) {
+            result.aiRecommendation = aiRecommendation;
+        }
 
         // 2. Metadata Extraction
         const forwarded = req.headers.get("x-forwarded-for");

@@ -86,6 +86,7 @@ export interface JobOfferResult {
 
     keyDrivers: string[];
     explanation: string;
+    aiRecommendation?: string;
 
     assumptions: string[];
     uncertainFlags: string[];
