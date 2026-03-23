@@ -1,8 +1,16 @@
 import type { JobOfferResult, JobOfferInput } from '@/core/modules/job-offer/types';
 import type { Lang } from './i18n';
+import { buildCacheKey, getCached, setCache } from './ai-cache';
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
+
+function getAvailableProviders(): string[] {
+    const providers: string[] = [];
+    if (GROQ_API_KEY) providers.push('groq');
+    if (OPENROUTER_API_KEY) providers.push('openrouter');
+    return providers;
+}
 
 function formatIDR(n: number): string {
     return 'Rp ' + n.toLocaleString('id-ID');
@@ -147,12 +155,47 @@ Provide a recommendation in markdown bulleted format (max 3 bullets) covering:
 
 Use • or - for bullet points in markdown. Answer in English.`;
 
+    const cacheKey = buildCacheKey({
+        moneyDelta: result.moneyDelta,
+        verdict: result.verdict,
+        finalScore: result.finalScore,
+        workModeChange,
+        employmentChange,
+        commuteMinutesDelta: input.commuteMinutesDelta || 0,
+        commuteCostDelta: input.commuteCostDelta,
+        lang,
+    });
+
+    const cached = getCached(cacheKey);
+    if (cached) return cached;
+
+    const providers = getAvailableProviders();
+    if (providers.length === 0) {
+        console.warn('No AI providers configured. Set GROQ_API_KEY or OPENROUTER_API_KEY.');
+        return null;
+    }
+
+    if (!GROQ_API_KEY && OPENROUTER_API_KEY) {
+        try {
+            const result = await fetchFromOpenRouter(promptBase, lang);
+            setCache(cacheKey, result);
+            return result;
+        } catch (error) {
+            console.warn('OpenRouter failed:', error);
+            return null;
+        }
+    }
+
     try {
-        return await fetchFromGroq(promptBase, lang);
+        const result = await fetchFromGroq(promptBase, lang);
+        setCache(cacheKey, result);
+        return result;
     } catch (error) {
         console.warn('Groq failed, trying OpenRouter:', error);
         try {
-            return await fetchFromOpenRouter(promptBase, lang);
+            const result = await fetchFromOpenRouter(promptBase, lang);
+            setCache(cacheKey, result);
+            return result;
         } catch (fallbackError) {
             console.warn('OpenRouter also failed:', fallbackError);
             return null;

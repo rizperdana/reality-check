@@ -6,6 +6,7 @@ import { detectLangFromNavigator, translate, DEFAULT_LANG, DATA_VERSION, type La
 import { friendlySummary, suggestionsFor, shortVerdictLabel } from '@/lib/ui-helpers';
 import { parseMarkdown } from '@/lib/markdown';
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 type ApiPayload = { ok: boolean; result?: JobOfferResult; error?: string };
 
@@ -128,6 +129,7 @@ export default function JobOfferPage() {
 
         {/* Result Display */}
         {result && !loading && (
+          <ErrorBoundary>
           <section className={`${retroCard} border-white !bg-neutral-900 animate-in zoom-in-95 duration-300`}>
              <div className="flex justify-between border-b-2 border-white/20 pb-4 mb-6">
                 <span className={`${result.verdict === 'POSITIVE' ? '!bg-emerald-500 !text-black' :
@@ -181,6 +183,7 @@ export default function JobOfferPage() {
                 </div>
              </div>
           </section>
+          </ErrorBoundary>
         )}
 
         {/* THE FORM */}
